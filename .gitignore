@@ -1,0 +1,26 @@
+# Object files and build intermediates
+obj/
+bin/
+*.o
+*.obj
+*.exe
+*.dll
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.cbp.mak
+*.layout
+*.depend
+
+# Windows temporary files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Node modules & temporary test outputs
+node_modules/
+report_assets/test*.pdf
+report_assets/test*.html
+report_assets/sample*.pdf
+report_assets/sample*.html
