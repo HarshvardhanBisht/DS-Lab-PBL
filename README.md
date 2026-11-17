@@ -1,4 +1,4 @@
-# 🚨 AURA-EMS: Adaptive Urban Routing & Allocation for Emergency Services
+# 🚨Adaptive Urban Routing & Allocation for Emergency Services
 
 [![C++17](https://img.shields.io/badge/Language-C%2B%2B17-blue.svg?style=flat-square&logo=c%2B%2B)](https://en.cppreference.com/w/cpp/17)
 [![HTML5/Canvas](https://img.shields.io/badge/Frontend-HTML5%20%2F%20Canvas%20%2F%20CSS3-orange.svg?style=flat-square)](https://developer.mozilla.org/en-US/docs/Web/HTML)
