@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Response & Resource Management System | JIIT Noida</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar">
+        <div style="padding: 24px 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #ef4444 0%, #0284c7 100%); display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 0 15px rgba(2,132,199,0.4);">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h1 style="font-size: 15px; font-weight: 700; letter-spacing: -0.02em;">DISASTER ECC</h1>
+                <p style="font-size: 11px; color: var(--accent-cyan); font-weight: 500;">JIIT CSE • DS LAB PBL</p>
+            </div>
+        </div>
+
+        <div style="padding: 16px 0; flex: 1; overflow-y: auto;">
+            <div class="nav-item active" data-target="view-map">
+                <i class="fa-solid fa-map-location-dot" style="width: 18px;"></i>
+                <span>Live Command Map</span>
+            </div>
+            <div class="nav-item" data-target="view-visualizer">
+                <i class="fa-solid fa-route" style="width: 18px;"></i>
+                <span>Algorithm Visualizer</span>
+            </div>
+            <div class="nav-item" data-target="view-inspector">
+                <i class="fa-solid fa-network-wired" style="width: 18px;"></i>
+                <span>Data Structure Inspector</span>
+            </div>
+            <div class="nav-item" data-target="view-simulation">
+                <i class="fa-solid fa-sliders" style="width: 18px;"></i>
+                <span>Simulation Center</span>
+            </div>
+            <div class="nav-item" data-target="view-resources">
+                <i class="fa-solid fa-truck-medical" style="width: 18px;"></i>
+                <span>Resources & Evacuation</span>
+            </div>
+            <div class="nav-item" data-target="view-reports">
+                <i class="fa-solid fa-chart-line" style="width: 18px;"></i>
+                <span>Reports & Benchmarks</span>
+            </div>
+        </div>
+
+        <!-- Student Credits Card -->
+        <div style="padding: 16px; border-top: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">Submitted By:</div>
+            <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px;">Harshvardhan Bisht, Kashish,</div>
+            <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Syed Ali Baquir Mehdi, Sanskriti Kaushik</div>
+            <div style="font-size: 11px; color: var(--accent-cyan);">Faculty: Mr. Varun Srivastava</div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div id="main-content">
+
+        <!-- Top Bar -->
+        <header id="topbar">
+            <!-- Left Info -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-emerald); box-shadow: 0 0 10px var(--accent-emerald);"></span>
+                    <span class="mono" style="font-size: 13px; font-weight: 600; color: var(--text-secondary);" id="sim-clock">TIME: 00:00:00</span>
+                </div>
+
+                <!-- KPI Badges -->
+                <div style="display: flex; gap: 10px;">
+                    <div class="glass-panel" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                        <span style="color: var(--accent-crimson); font-weight: 700;" id="kpi-queue-count">0</span>
+                        <span style="color: var(--text-muted);">Queue</span>
+                    </div>
+                    <div class="glass-panel" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                        <span style="color: var(--accent-emerald); font-weight: 700;" id="kpi-active-teams">0</span>
+                        <span style="color: var(--text-muted);">Teams</span>
+                    </div>
+                    <div class="glass-panel" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                        <span style="color: var(--accent-cyan); font-weight: 700;" id="kpi-free-beds">0</span>
+                        <span style="color: var(--text-muted);">Free Beds</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Autocomplete Search Bar (Trie + LRU Cache) -->
+            <div style="position: relative; width: 320px;">
+                <div style="position: relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 11px; font-size: 13px; color: var(--text-muted);"></i>
+                    <input type="text" id="trie-search-input" placeholder="Search hospitals, shelters (Trie)..." 
+                           style="width: 100%; padding: 8px 12px 8px 34px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); border-radius: 20px; color: white; font-size: 13px; outline: none;">
+                </div>
+                <!-- Autocomplete Dropdown -->
+                <div id="trie-autocomplete-box" class="glass-panel" style="position: absolute; top: 40px; left: 0; width: 100%; border-radius: 8px; display: none; max-height: 240px; overflow-y: auto; z-index: 1000;">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="btn-danger" id="btn-report-incident" title="Report New Incident">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Report Incident</span>
+                </button>
+                <button class="btn-primary" id="btn-dispatch-next" title="Dispatch Highest Severity (Max-Heap + FIFO)">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Dispatch Next</span>
+                </button>
+                <button class="btn-secondary" id="btn-undo-action" title="Undo Last Operation (Stack)">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Undo</span>
+                </button>
+                <button class="btn-secondary" id="btn-toggle-cheat-sheet" title="Complexity Cheat-Sheet">
+                    <i class="fa-solid fa-circle-info"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- VIEW 1: LIVE COMMAND MAP -->
+        <div id="view-map" class="view-panel active">
+            <!-- Fullscreen Canvas -->
+            <canvas id="map-canvas"></canvas>
+
+            <!-- Map Controls Overlay -->
+            <div class="glass-panel map-overlay-card" style="top: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Map Overlays</div>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                    <input type="checkbox" id="chk-tarjan-bottlenecks" style="accent-color: var(--accent-purple);">
+                    <span>Highlight Tarjan Bottlenecks (Bridges)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                    <input type="checkbox" id="chk-show-labels" checked style="accent-color: var(--accent-blue);">
+                    <span>Show Location Labels</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                    <input type="checkbox" id="chk-show-distances" checked style="accent-color: var(--accent-blue);">
+                    <span>Show Road Distances</span>
+                </label>
+                <div style="border-top: 1px solid var(--border-color); padding-top: 8px; display: flex; gap: 6px;">
+                    <button class="btn-secondary" id="btn-zoom-in" style="padding: 4px 10px;"><i class="fa-solid fa-plus"></i></button>
+                    <button class="btn-secondary" id="btn-zoom-out" style="padding: 4px 10px;"><i class="fa-solid fa-minus"></i></button>
+                    <button class="btn-secondary" id="btn-reset-map" style="padding: 4px 10px;">Reset View</button>
+                </div>
+            </div>
+
+            <!-- Live Route Finder HUD (High Visibility Fastest Path) -->
+            <div class="glass-panel map-overlay-card" id="map-route-finder-card" style="top: 20px; left: 320px; min-width: 340px; display: flex; flex-direction: column; gap: 8px; border-left: 4px solid var(--accent-cyan);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase;">
+                        <i class="fa-solid fa-route"></i> Live Route Finder (A* & Dijkstra)
+                    </span>
+                    <button id="btn-clear-map-route" class="btn-secondary" style="padding: 2px 8px; font-size: 11px;">Clear</button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <select id="map-start-node" style="flex: 1; padding: 4px 8px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); border-radius: 6px; color: white; font-size: 11px;"></select>
+                    <span style="color: var(--text-muted); font-size: 11px;">➔</span>
+                    <select id="map-end-node" style="flex: 1; padding: 4px 8px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); border-radius: 6px; color: white; font-size: 11px;"></select>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button id="btn-calc-fastest-route" class="btn-primary" style="padding: 5px 12px; font-size: 11px;">
+                        <i class="fa-solid fa-bolt"></i> Compute Fastest Route
+                    </button>
+                    <span id="map-route-stats" class="mono" style="font-size: 12px; color: var(--accent-emerald); font-weight: 700;"></span>
+                </div>
+                <div id="map-route-path-text" style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; max-height: 48px; overflow-y: auto;">Select start and destination to compute and highlight the fastest route in real-time.</div>
+            </div>
+
+            <!-- Legend Overlay -->
+            <div class="glass-panel map-overlay-card" style="bottom: 20px; left: 20px; font-size: 12px; min-width: 220px;">
+                <div style="font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase;">Infrastructure Legend</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <div style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></span> Fire Station</div>
+                    <div style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #3b82f6;"></span> Hospital</div>
+                    <div style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981;"></span> Shelter</div>
+                    <div style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #8b5cf6;"></span> Police</div>
+                    <div style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #eab308;"></span> Village</div>
+                    <div style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #06b6d4;"></span> Transit Hub</div>
+                </div>
+                <div style="margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 11px;">
+                    <i class="fa-solid fa-circle-info" style="color: var(--accent-cyan);"></i> Click road to block/unblock. Click node to inspect.
+                </div>
+            </div>
+
+            <!-- Active Mission Status Card -->
+            <div class="glass-panel map-overlay-card" id="dispatch-banner" style="top: 20px; right: 20px; min-width: 340px; display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--accent-emerald); text-transform: uppercase;">
+                        <i class="fa-solid fa-truck-fast"></i> Mission Dispatched
+                    </span>
+                    <span class="mono" style="font-size: 11px; color: var(--text-muted);" id="m-id">MSN-501</span>
+                </div>
+                <div style="font-size: 15px; font-weight: 700;" id="m-title">Flood at Hindan River</div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin: 4px 0;" id="m-details">Route: 9.6 km | Team: RT-01</div>
+                <div style="font-size: 11px; color: var(--accent-cyan); margin-top: 6px;" id="m-path">Path: Sector 62 -> Mamura -> Hindan</div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: ALGORITHM VISUALIZER -->
+        <div id="view-visualizer" class="view-panel" style="padding: 24px; gap: 24px;">
+            <div style="flex: 2; display: flex; flex-direction: column; gap: 16px;">
+                <!-- Algorithm Select Controls -->
+                <div class="glass-panel" style="padding: 16px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Algorithm</label>
+                            <select id="algo-select" style="display: block; padding: 6px 12px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); border-radius: 6px; color: white; font-weight: 600; margin-top: 4px;">
+                                <option value="dijkstra">Dijkstra's Shortest Path</option>
+                                <option value="astar">A* Heuristic Search</option>
+                                <option value="compare">Dijkstra vs A* Side-by-Side</option>
+                                <option value="bfs">Breadth-First Search (BFS)</option>
+                                <option value="dfs">Depth-First Search (DFS)</option>
+                                <option value="kruskal">Kruskal's MST (Greedy DSU)</option>
+                                <option value="prim">Prim's MST (Cut Property)</option>
+                                <option value="tarjan">Tarjan's Bridges & Articulation</option>
+                                <option value="maxflow">Edmonds-Karp Max-Flow</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Start Node</label>
+                            <select id="algo-start-node" style="display: block; padding: 6px 12px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); border-radius: 6px; color: white; margin-top: 4px;"></select>
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">End / Sink Node</label>
+                            <select id="algo-end-node" style="display: block; padding: 6px 12px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); border-radius: 6px; color: white; margin-top: 4px;"></select>
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Speed</label>
+                            <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                                <input type="range" id="algo-speed" min="100" max="1500" value="600" step="50" style="width: 80px; accent-color: var(--accent-cyan);">
+                                <span id="speed-label" class="mono" style="font-size: 11px; color: var(--accent-cyan); min-width: 45px;">600ms</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Playback Controls -->
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn-secondary" id="btn-step-prev" title="Step Backward"><i class="fa-solid fa-backward-step"></i></button>
+                        <button class="btn-primary" id="btn-play-pause"><i class="fa-solid fa-play"></i> Play</button>
+                        <button class="btn-secondary" id="btn-step-next" title="Step Forward"><i class="fa-solid fa-forward-step"></i></button>
+                        <button class="btn-secondary" id="btn-algo-reset" title="Reset Trace"><i class="fa-solid fa-rotate"></i></button>
+                    </div>
+                </div>
+
+                <!-- Side-by-Side Comparison Card (for Compare mode) -->
+                <div id="algo-compare-card" class="glass-panel" style="padding: 14px; border-radius: 12px; display: none; border-left: 4px solid var(--accent-cyan);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4 style="font-size: 13px; font-weight: 700; color: white;">
+                            <i class="fa-solid fa-scale-balanced" style="color: var(--accent-cyan); margin-right: 6px;"></i> Side-by-Side: Dijkstra vs A* Heuristic
+                        </h4>
+                        <span id="cmp-summary-badge" class="mono" style="font-size: 11px; background: rgba(16,185,129,0.2); color: var(--accent-emerald); padding: 2px 8px; border-radius: 4px; font-weight: 700;">-0% Explored</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px;">
+                        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); padding: 10px; border-radius: 6px;">
+                            <div style="font-weight: 700; color: #ef4444; margin-bottom: 4px;">Dijkstra's Algorithm (Uniform-Cost)</div>
+                            <div>Explored Nodes: <strong id="cmp-dij-nodes" class="mono" style="color: white;">--</strong></div>
+                            <div>Path Distance: <strong id="cmp-dij-dist" class="mono" style="color: white;">--</strong></div>
+                            <div>Execution Time: <strong id="cmp-dij-time" class="mono" style="color: white;">--</strong></div>
+                        </div>
+                        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 10px; border-radius: 6px;">
+                            <div style="font-weight: 700; color: #10b981; margin-bottom: 4px;">A* Search (Euclidean Heuristic)</div>
+                            <div>Explored Nodes: <strong id="cmp-ast-nodes" class="mono" style="color: white;">--</strong></div>
+                            <div>Path Distance: <strong id="cmp-ast-dist" class="mono" style="color: white;">--</strong></div>
+                            <div>Execution Time: <strong id="cmp-ast-time" class="mono" style="color: white;">--</strong></div>
+                        </div>
+                    </div>
+                    <div id="cmp-summary" style="margin-top: 8px; font-size: 11px; color: var(--text-secondary); line-height: 1.4;"></div>
+                </div>
+
+                <!-- Trace Visual Canvas -->
+                <div class="glass-panel" style="flex: 1; border-radius: 12px; position: relative; min-height: 420px;">
+                    <canvas id="visualizer-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+            </div>
+
+            <!-- Algorithm State & Pseudocode Sidebar -->
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
+                <div class="glass-panel" style="padding: 16px; border-radius: 12px;">
+                    <h3 style="font-size: 14px; font-weight: 700; color: var(--accent-cyan); margin-bottom: 8px;">Step Execution Inspector</h3>
+                    <div id="algo-step-counter" class="mono" style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Step 0 / 0</div>
+                    <div id="algo-step-explanation" style="font-size: 13px; line-height: 1.5; color: var(--text-primary); min-height: 44px;">Select an algorithm and press Play.</div>
+                </div>
+
+                <!-- Pseudocode View with Line Highlighting -->
+                <div class="glass-panel" style="padding: 16px; border-radius: 12px;">
+                    <h3 style="font-size: 12px; font-weight: 700; color: var(--accent-amber); text-transform: uppercase; margin-bottom: 8px;">
+                        <i class="fa-solid fa-code"></i> Algorithm Pseudocode (Line Trace)
+                    </h3>
+                    <div id="algo-pseudocode" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; max-height: 140px; overflow-y: auto;"></div>
+                </div>
+
+                <!-- Priority Queue & Visited Set Tabs -->
+                <div class="glass-panel" style="flex: 1; padding: 16px; border-radius: 12px; overflow-y: auto; max-height: 320px;">
+                    <h3 style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px;">Priority Queue / Frontier</h3>
+                    <div id="algo-frontier-list" style="font-size: 12px; display: flex; flex-direction: column; gap: 4px;"></div>
+
+                    <h3 style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-top: 14px; margin-bottom: 8px;">Settled / Visited Nodes</h3>
+                    <div id="algo-visited-set" style="display: flex; flex-wrap: wrap; gap: 4px; font-size: 11px;"></div>
+
+                    <h3 style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-top: 14px; margin-bottom: 8px;">Tentative Distances Table</h3>
+                    <div id="algo-dist-table" class="mono" style="font-size: 11px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: DATA STRUCTURE INSPECTOR -->
+        <div id="view-inspector" class="view-panel" style="padding: 24px; gap: 24px; flex-direction: column; overflow-y: auto;">
+            <!-- ROW 1: Max-Heap Tree & Array View -->
+            <div class="glass-panel" style="padding: 20px; border-radius: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <h3 style="font-size: 16px; font-weight: 700; color: var(--accent-crimson);">
+                            <i class="fa-solid fa-sitemap"></i> Custom Indexed Max-Heap (Dynamic Priority Queue with Aging)
+                        </h3>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                            Orders emergency incidents by dynamic priority: <code style="color: var(--accent-cyan);">P = Severity * 100 + WaitMinutes * 1.5</code>. Update-Key in $\mathcal{O}(\log N)$.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button class="btn-secondary" id="btn-heap-age" style="font-size: 12px;"><i class="fa-solid fa-clock"></i> Age (+15m)</button>
+                        <button class="btn-secondary" id="btn-heap-extract" style="font-size: 12px; border-color: rgba(239,68,68,0.4); color: #ef4444;"><i class="fa-solid fa-arrow-up-from-bracket"></i> Extract Max</button>
+                        <span class="mono" style="font-size: 12px; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 6px;" id="heap-size-badge">N=0</span>
+                    </div>
+                </div>
+
+                <!-- Heap Binary Tree Canvas -->
+                <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 12px; margin-bottom: 12px; position: relative;">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">Binary Tree Hierarchy</div>
+                    <canvas id="heap-tree-canvas" style="width: 100%; height: 160px; display: block;"></canvas>
+                </div>
+
+                <!-- Heap Array Cells View -->
+                <div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">Contiguous Array Buffer Representation</div>
+                    <div id="heap-array-cells" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;"></div>
+                </div>
+            </div>
+
+            <!-- ROW 2: Custom Hash Table & Union-Find -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Custom Hash Table Buckets -->
+                <div class="glass-panel" style="padding: 20px; border-radius: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div>
+                            <h3 style="font-size: 15px; font-weight: 700; color: var(--accent-emerald);">
+                                <i class="fa-solid fa-table-cells"></i> Custom Hash Table (Chaining Diagnostics)
+                            </h3>
+                            <p style="font-size: 11px; color: var(--text-secondary);">Polynomial rolling hash with dynamic rehashing at load factor $>0.75$.</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button class="btn-secondary" id="btn-hash-rehash" style="font-size: 11px; padding: 4px 8px;"><i class="fa-solid fa-arrows-rotate"></i> Rehash</button>
+                            <span class="mono" style="font-size: 12px; color: var(--accent-cyan);" id="hash-load-badge">Load: 0.00</span>
+                        </div>
+                    </div>
+                    <div id="hash-table-buckets" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; max-height: 170px; overflow-y: auto;"></div>
+                    <div id="hash-chain-inspector" style="margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 11px; color: var(--text-secondary); min-height: 32px;">Click any bucket above to inspect its separate-chaining linked list.</div>
+                </div>
+
+                <!-- Union-Find Components -->
+                <div class="glass-panel" style="padding: 20px; border-radius: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div>
+                            <h3 style="font-size: 15px; font-weight: 700; color: var(--accent-purple);">
+                                <i class="fa-solid fa-circle-nodes"></i> Union-Find Disjoint Set Forest
+                            </h3>
+                            <p style="font-size: 11px; color: var(--text-secondary);">Near $\mathcal{O}(1)$ connected components via Path Compression & Union-by-Rank.</p>
+                        </div>
+                        <span class="mono" style="font-size: 12px; color: var(--accent-purple); font-weight: 700;" id="uf-component-count">1 Component</span>
+                    </div>
+                    <div id="union-find-components" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <!-- ROW 3: Mission History (Doubly Linked List & Stack) & Trie/LRU Cache -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Mission History DLL & Undo Stack -->
+                <div class="glass-panel" style="padding: 20px; border-radius: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div>
+                            <h3 style="font-size: 15px; font-weight: 700; color: var(--accent-amber);">
+                                <i class="fa-solid fa-clock-rotate-left"></i> Mission History (Doubly Linked List & Undo Stack)
+                            </h3>
+                            <p style="font-size: 11px; color: var(--text-secondary);">Bidirectional pointer traversal ($\leftrightarrow$) with LIFO stack undo in $\mathcal{O}(1)$.</p>
+                        </div>
+                        <button class="btn-primary" id="btn-inspector-undo" style="font-size: 12px; padding: 5px 10px;"><i class="fa-solid fa-rotate-left"></i> Undo</button>
+                    </div>
+                    <div id="history-dll-cards" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; min-height: 80px; align-items: center;"></div>
+                </div>
+
+                <!-- Trie & LRU Cache Status -->
+                <div class="glass-panel" style="padding: 20px; border-radius: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <h3 style="font-size: 15px; font-weight: 700; color: var(--accent-blue);">
+                            <i class="fa-solid fa-bolt"></i> Trie Walk & LRU Search Cache
+                        </h3>
+                        <div style="display: flex; gap: 12px; font-size: 12px;">
+                            <div>Hits: <span class="mono" style="color: var(--accent-emerald); font-weight: 700;" id="lru-hits">0</span></div>
+                            <div>Misses: <span class="mono" style="color: var(--accent-crimson); font-weight: 700;" id="lru-misses">0</span></div>
+                            <div>Hit Rate: <span class="mono" style="color: var(--accent-cyan); font-weight: 700;" id="lru-rate">0.0%</span></div>
+                        </div>
+                    </div>
+                    <!-- Live Trie Walk Search Box -->
+                    <div style="margin-bottom: 10px;">
+                        <input type="text" id="inspector-trie-input" placeholder="Type location prefix to watch Trie character walk (e.g., 'JIIT', 'Sec')..." style="width: 100%; padding: 6px 10px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); border-radius: 6px; color: white; font-size: 12px;">
+                    </div>
+                    <div id="inspector-trie-walk" style="display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 4px 8px; background: rgba(0,0,0,0.3); border-radius: 6px; margin-bottom: 10px; overflow-x: auto;">
+                        <span class="trie-bubble">Root</span>
+                        <span class="trie-arrow">➔</span>
+                        <span style="font-size: 11px; color: var(--text-muted);">Type above to visualize Trie character transitions</span>
+                    </div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">LRU Memory Slots (MRU ➔ LRU)</div>
+                    <div id="lru-slots" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                </div>
+            </div>
+
+            <!-- ROW 4: Rescue Team Min-Heap (Workload Balance) -->
+            <div class="glass-panel" style="padding: 20px; border-radius: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div>
+                        <h3 style="font-size: 15px; font-weight: 700; color: var(--accent-cyan);">
+                            <i class="fa-solid fa-users-gear"></i> Rescue Squad Min-Heap (Workload Balancer)
+                        </h3>
+                        <p style="font-size: 12px; color: var(--text-secondary);">Selects least-loaded team with minimum active missions in $\mathcal{O}(\log K)$ time.</p>
+                    </div>
+                </div>
+                <div id="squad-workload-heap" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: SIMULATION CENTER -->
+        <div id="view-simulation" class="view-panel" style="padding: 24px; gap: 24px; flex-direction: column;">
+            <div class="glass-panel" style="padding: 20px; border-radius: 12px;">
+                <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Disaster Scenario Presets</h2>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                    <div class="glass-panel" style="padding: 16px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Hindan Flash Flood Breach</h4>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">Submerges 40 homes, breaches bridge at Sector 63, spawns Severity 5 Flood.</p>
+                        <button class="btn-primary" onclick="triggerScenario('flood')">Trigger Flood Scenario</button>
+                    </div>
+                    <div class="glass-panel" style="padding: 16px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Sector 63 Chemical Fire</h4>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">Industrial solvent blaze, requires hazmat foam tenders and foam units.</p>
+                        <button class="btn-primary" onclick="triggerScenario('fire')">Trigger Fire Scenario</button>
+                    </div>
+                    <div class="glass-panel" style="padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Noida Seismic Event 6.1M</h4>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">Structural cracks in unreinforced buildings, closes 2 expressway bridges.</p>
+                        <button class="btn-primary" onclick="triggerScenario('earthquake')">Trigger Earthquake</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Advancement Controls -->
+            <div class="glass-panel" style="padding: 20px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Dynamic Wait-Time Aging Accelerator</h3>
+                    <p style="font-size: 12px; color: var(--text-secondary);">Advances simulation time to demonstrate priority escalation on waiting incidents.</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-secondary" onclick="advanceTime(5)">+5 Minutes</button>
+                    <button class="btn-secondary" onclick="advanceTime(15)">+15 Minutes</button>
+                    <button class="btn-secondary" onclick="advanceTime(60)">+1 Hour</button>
+                </div>
+            </div>
+
+            <!-- Live Simulation Impact Monitor -->
+            <div class="glass-panel" style="padding: 20px; border-radius: 12px; border-left: 4px solid var(--accent-cyan);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div>
+                        <h3 style="font-size: 16px; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-satellite-dish"></i> Live Simulation Impact Monitor
+                        </h3>
+                        <p style="font-size: 12px; color: var(--text-secondary);">Real-time city state changes caused by disaster scenarios and time aging.</p>
+                    </div>
+                    <button class="btn-primary" onclick="switchToMap()" style="padding: 8px 18px; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <i class="fa-solid fa-map-location-dot"></i> View on Live Command Map ➔
+                    </button>
+                </div>
+                <div id="sim-impact-content" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 5: RESOURCES & EVACUATION -->
+        <div id="view-resources" class="view-panel" style="padding: 24px; gap: 24px; flex-direction: column;">
+            <!-- Relief Shelters Grid -->
+            <div>
+                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">Humanitarian Relief Shelters & Live Occupancy</h3>
+                <div id="shelters-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;"></div>
+            </div>
+
+
+        </div>
+
+        <!-- VIEW 6: REPORTS & BENCHMARKS -->
+        <div id="view-reports" class="view-panel" style="padding: 24px; gap: 24px; flex-direction: column;">
+            <!-- Mission History Table with Custom Sorting -->
+            <div class="glass-panel" style="padding: 20px; border-radius: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="font-size: 16px; font-weight: 700;">Completed Mission Audit Log (Doubly Linked List)</h3>
+                        <p style="font-size: 12px; color: var(--text-secondary);">Sorted via custom QuickSort or MergeSort without STL sort.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="report-sort-key" style="padding: 6px 12px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); border-radius: 6px; color: white;">
+                            <option value="severity">Sort by Severity (Desc)</option>
+                            <option value="rescued">Sort by People Rescued</option>
+                            <option value="distance">Sort by Route Distance</option>
+                            <option value="date">Sort by Timestamp</option>
+                        </select>
+                        <select id="report-sort-algo" style="padding: 6px 12px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); border-radius: 6px; color: white;">
+                            <option value="quick">Quick Sort (In-Place)</option>
+                            <option value="merge">Merge Sort (Stable)</option>
+                        </select>
+                        <button class="btn-primary" id="btn-refresh-reports">Apply Sort</button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;" id="reports-table">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-align: left;">
+                                <th style="padding: 8px;">Mission ID</th>
+                                <th style="padding: 8px;">Disaster Type</th>
+                                <th style="padding: 8px;">Severity</th>
+                                <th style="padding: 8px;">Location</th>
+                                <th style="padding: 8px;">Rescued</th>
+                                <th style="padding: 8px;">Team</th>
+                                <th style="padding: 8px;">Distance</th>
+                                <th style="padding: 8px;">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Modal: Report Incident -->
+    <div id="modal-report" class="modal-overlay">
+        <div class="glass-panel" style="width: 480px; padding: 24px; border-radius: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <h3 style="font-size: 17px; font-weight: 700;"><i class="fa-solid fa-bullhorn" style="color: var(--accent-crimson);"></i> Register Disaster Incident</h3>
+                <button class="btn-secondary" id="modal-report-close" style="padding: 4px 10px;">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                <div>
+                    <label style="display: block; margin-bottom: 4px; color: var(--text-secondary);">Disaster Type (Polymorphic Resource Assignment)</label>
+                    <select id="inp-inc-type" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: white; border-radius: 6px;">
+                        <option value="Fire">Fire (Requests Fire Trucks, Foam, Burn Kits)</option>
+                        <option value="Flood">Flood (Requests Boats, Life Jackets, Divers)</option>
+                        <option value="Earthquake">Earthquake (Requests Excavators, Acoustic Detectors)</option>
+                        <option value="Landslide">Landslide (Requests Earth Movers, Canines)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 4px; color: var(--text-secondary);">Location</label>
+                    <select id="inp-inc-loc" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: white; border-radius: 6px;"></select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 4px; color: var(--text-secondary);">Severity (1 to 5 - Max-Heap Priority)</label>
+                    <input type="range" id="inp-inc-sev" min="1" max="5" value="4" style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                        <span>1 (Low)</span><span>2</span><span>3</span><span>4</span><span>5 (Critical)</span>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 4px; color: var(--text-secondary);">Affected People</label>
+                        <input type="number" id="inp-inc-aff" value="40" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: white; border-radius: 6px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 4px; color: var(--text-secondary);">Casualties</label>
+                        <input type="number" id="inp-inc-cas" value="2" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: white; border-radius: 6px;">
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 4px; color: var(--text-secondary);">Situation Description</label>
+                    <textarea id="inp-inc-desc" rows="3" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: white; border-radius: 6px;" placeholder="Details of emergency event..."></textarea>
+                </div>
+                <button class="btn-primary" id="btn-submit-incident" style="margin-top: 8px; justify-content: center;">Submit to Emergency Queue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cheat Sheet Drawer -->
+    <div id="cheat-sheet-drawer" class="glass-panel" style="position: fixed; top: 0; right: -420px; width: 420px; height: 100vh; z-index: 1500; transition: right 0.3s ease; padding: 24px; overflow-y: auto; box-shadow: -10px 0 30px rgba(0,0,0,0.6);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--accent-cyan);"><i class="fa-solid fa-graduation-cap"></i> Syllabus Complexity Guide</h3>
+            <button class="btn-secondary" id="btn-close-drawer" style="padding: 2px 8px;">&times;</button>
+        </div>
+        <div id="cheat-sheet-content" style="font-size: 12px; display: flex; flex-direction: column; gap: 14px;"></div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <script src="app.js?v=2.3"></script>
+</body>
+</html>

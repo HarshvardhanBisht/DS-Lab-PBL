@@ -1,0 +1,4 @@
+SH-01|Sector 63 Community Center|Sector 63 Community Center|450|60|2000|5000|30|+91-120-240101
+SH-02|Sector 128 Sports Complex Shelter|Sector 128 Sports Complex|1200|150|6000|15000|80|+91-120-240102
+SH-03|Indirapuram Relief Camp|Indirapuram Relief Camp|700|90|3500|8000|50|+91-120-240103
+SH-04|JIIT Academic Shelter Wing|JIIT Sector 62|300|20|1500|4000|25|+91-120-240104

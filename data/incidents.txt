@@ -1,0 +1,5 @@
+INC-101|Fire|Mamura Village|4|Reported|2026-11-13 18:15:00|35|2|Major electrical and residential structure fire near market area
+INC-102|Flood|Hindan River Embankment|5|Reported|2026-11-13 18:20:00|75|4|Flash flood overflow breaching embankment 40 homes submerged
+INC-103|Earthquake|Sector 18 Commercial Hub|4|Reported|2026-11-13 18:25:00|50|6|Medium seismic event causing parking lot collapse and structural cracks
+INC-104|Landslide|Greater Noida Expressway Junction|3|Reported|2026-11-13 18:30:00|20|1|Mudslide blocking two outbound expressway lanes after heavy rains
+INC-105|Fire|Sector 63 Community Center|2|Reported|2026-11-13 18:35:00|12|0|Warehouse chemical solvent ignition contained in basement
